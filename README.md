@@ -1,2 +1,3 @@
-# tadn-mot
-Transformer based Decision Networks for MOT
+# Transformer based Decision Networks for MOT
+
+Source code for the project is coming soon!
