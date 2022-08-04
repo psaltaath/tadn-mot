@@ -1,21 +1,21 @@
+"""Script to perform evaluation using a pretrained model"""
 from argparse import ArgumentParser
-from .validate_LAM import Validator, init_model_from_config
-from ..config.experiment import ExperimentConfig
-from ..config.data import MOTDatasetConfig
-from config4ml.lightning.extra import ConsoleLogger
+
 import pytorch_lightning as pl
 import torch
+from config4ml.lightning.extra import ConsoleLogger
+
+from ..config.data import MOTDatasetConfig
+from ..config.experiment import ExperimentConfig
+from .inference import load_from_ckpt
 
 
 def main(args):
+    """Main script function"""
+    model = load_from_ckpt(args.ckpt, args.json_config)
+    model.manager.lam_validation = False
 
     cfg = ExperimentConfig.parse_file(args.json_config)
-
-    model = init_model_from_config(cfg)
-
-    ckpt = torch.load(args.ckpt)
-    model.load_state_dict(ckpt["state_dict"])
-    model.manager.lam_validation = False
 
     assert isinstance(cfg.dataset, MOTDatasetConfig)
     _, val_dloader = cfg.dataset.build_dataloaders(batch_size=1)
@@ -31,10 +31,13 @@ def main(args):
     trainer.validate(model, dataloaders=val_dloader)
 
 
+# Main entry-point
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("ckpt")
-    parser.add_argument("--json_config")
+    parser.add_argument("ckpt", type=str, help="Path to checkpoint")
+    parser.add_argument(
+        "json_config", type=str, help="Path to json config used for training"
+    )
 
     args = parser.parse_args()
     main(args)

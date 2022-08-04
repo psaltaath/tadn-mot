@@ -1,3 +1,6 @@
+"""Script to validate Training Strategy using a LAM-based hypothetical tracker.
+Used to estimate a level of performance expected using the Online Training strategy
+"""
 from argparse import ArgumentParser
 from typing import Any, Dict
 
@@ -6,16 +9,22 @@ import torch
 from config4ml.lightning.extra import ConsoleLogger
 
 from ..components import tracklets
+from ..components.transformer import TADN
 from ..config.data import MOTDatasetConfig
 from ..config.experiment import ExperimentConfig
+from ..mot import metrics
 from ..online_training import OnlineManager, OnlineTraining
-from ..components.transformer import TADN
 from ..utils.bbox import convert_MOTC_format
 from ..utils.tracklets import truncate_tracklets_MOTC_format
-from ..mot import metrics
 
 
 class Validator(OnlineTraining):
+    """Convenience class to support validation/evaluation
+
+    Inherits from:
+        OnlineTraining
+    """
+
     def __init__(
         self,
         manager: OnlineManager,
@@ -41,6 +50,7 @@ class Validator(OnlineTraining):
         self.manager.lam_validation = True
 
     def validation_step(self, batch, batch_idx) -> None:
+        """Modify validation step to compute LAM"""
 
         new_seq_flag = bool(batch["new_sequence"])
         end_seq_flag = bool(batch["is_last_frame_in_seq"])
@@ -109,6 +119,7 @@ class Validator(OnlineTraining):
 
 
 def init_model_from_config(cfg: ExperimentConfig) -> OnlineTraining:
+    """Initialize a Validator instance from config"""
     tracker: TADN = cfg.tracker.get_tracker()
     manager = OnlineManager(tracker=tracker, **cfg.manager.dict())
     assert isinstance(cfg.dataset, MOTDatasetConfig)
@@ -125,6 +136,7 @@ def init_model_from_config(cfg: ExperimentConfig) -> OnlineTraining:
 
 
 def main(args):
+    """Main script function"""
 
     cfg = ExperimentConfig.parse_file(args.json_config)
 
@@ -144,9 +156,10 @@ def main(args):
     trainer.validate(model, dataloaders=val_dloader)
 
 
+# Main entry point
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--json_config")
+    parser.add_argument("json_config", help="Path to json config file")
 
     args = parser.parse_args()
     main(args)

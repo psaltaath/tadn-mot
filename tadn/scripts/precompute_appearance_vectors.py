@@ -1,25 +1,27 @@
+"""Script to precompute appearance features vectors for the whole MOT dataset"""
+import os
 import pickle
-from typing import Tuple
-from matplotlib import transforms
-import numpy as np
-import torchvision.models as models
-from torchvision.transforms import Resize, Normalize, ToTensor, Compose
-import torch
-import torch.nn as nn
 from argparse import ArgumentParser
 from os import path as osp
-import os
-from tqdm import tqdm
+
+import numpy as np
+import torch
+import torch.nn as nn
 import torchreid
+import torchvision.models as models
+from torchvision.transforms import Compose, Normalize, Resize, ToTensor
+from tqdm import tqdm
+
+from ..data.base import OnlineTrainingDatasetWrapper
+from ..data.detrac import DetracDataset
 
 # from .data import OnlineTrainingDataset, load_frame_data
 from ..data.mot_challenge import MOTChallengeDataset
-from ..data.detrac import DetracDataset
-from ..legacy.carla import CarlaDataset
-from ..data.base import OnlineTrainingDatasetWrapper
 
 
 class Resnet18Features:
+    """Utility class to provide Resnet-18 CNN features"""
+
     def __init__(self) -> None:
         resnet18 = models.resnet18(pretrained=True)
         self.model = torch.nn.Sequential(*list(resnet18.children())[:-1], nn.Flatten())
@@ -37,7 +39,14 @@ class Resnet18Features:
 
 
 class ReidFeatures:
-    def __init__(self, ckpt_path) -> None:
+    """Utility class to provide Resnet-50 ReID CNN features"""
+
+    def __init__(self, ckpt_path: str) -> None:
+        """Constructor
+
+        Args:
+            ckpt_path (str): Path to pretrained weights.
+        """
         self.model = torchreid.utils.FeatureExtractor(
             model_name="resnet50_fc512",
             model_path=ckpt_path,
@@ -52,16 +61,11 @@ class ReidFeatures:
 
 
 def main(args):
+    """Main script function"""
 
     torch.set_grad_enabled(False)
 
-    # print(model)
-
-    if args.dset_type == "carla":
-        dset = CarlaDataset(
-            args.data_root, transforms=[], ignore_MOTC=True, load_frame_data=True
-        )
-    elif args.dset_type == "mot-challenge":
+    if args.dset_type == "mot-challenge":
         dset = MOTChallengeDataset(
             args.data_root,
             transforms=[],
@@ -105,7 +109,7 @@ def main(args):
     feats_vocabulary = {}
     feats_dict = {}
 
-    for sample in tqdm(dset_wrapper):
+    for sample in tqdm(dset_wrapper):  # type: ignore
 
         seq = sample["seq"]
         frame_id = sample["frame_id"]
@@ -116,6 +120,7 @@ def main(args):
 
         feat_list = []
 
+        # For each detection, crop patch and compute CNN features
         for d in detections:
             real_w: int = int(d[2]) if d[0] > 0 else int(d[0] + d[2])
             real_h: int = int(d[3]) if d[1] > 0 else int(d[1] + d[3])
@@ -138,6 +143,7 @@ def main(args):
         else:
             feats = torch.cat(feat_list, dim=0).cpu()
 
+        # Key-value based features storage
         key = f"{seq}_{frame_id}"
         feats_dict.update({key: feats})
         feats_vocabulary.update({key: osp.basename(current_file)})
@@ -165,22 +171,45 @@ def main(args):
 if __name__ == "__main__":
 
     parser = ArgumentParser()
-    parser.add_argument("data_root")
-    parser.add_argument("--samples_per_file", default=1024, type=int)
+    parser.add_argument("data_root", help="Path to dataset root folder")
+    parser.add_argument(
+        "--samples_per_file",
+        default=1024,
+        type=int,
+        help="Number of samples to be saved in each storage file",
+    )
     parser.add_argument(
         "--dset_type",
         default="mot-challenge",
         type=str,
-        choices=["mot-challenge", "detrac", "carla"],
+        choices=["mot-challenge", "detrac"],
+        help="Dataset type",
     )
-    parser.add_argument("--dset_mode", default="train")
+    parser.add_argument("--dset_mode", default="train", help="Dataset mode")
     parser.add_argument(
-        "--feature_extractor", default="resnet18", choices=["resnet18", "reid"]
+        "--feature_extractor",
+        default="resnet18",
+        choices=["resnet18", "reid"],
+        help="Feature extractor type",
     )
-    parser.add_argument("--reid_ckpt", default=None)
-    parser.add_argument("--dset_version", default="MOT17", choices=["MOT17", "MOT15"])
+    parser.add_argument(
+        "--reid_ckpt",
+        default=None,
+        help="Path to pretrained reid model. (Only if reid is the feature extractor)",
+    )
+    parser.add_argument(
+        "--dset_version",
+        default="MOT17",
+        choices=["MOT17", "MOT15"],
+        help="Dataset version. Only for MOTChallenge datasets",
+    )
 
-    parser.add_argument("--detector", default="EB", choices=["EB", "frcnn"])
+    parser.add_argument(
+        "--detector",
+        default="EB",
+        choices=["EB", "frcnn"],
+        help="Selected detector. Only for UA-DETRAC.",
+    )
 
     args = parser.parse_args()
 

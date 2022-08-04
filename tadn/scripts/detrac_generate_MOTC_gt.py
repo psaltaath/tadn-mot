@@ -1,12 +1,15 @@
+"""Generate MOTChallenge formatted ground truth for UA-DETRAC. For compat with evaluation pipeline"""
 import os
-from re import template
+from argparse import ArgumentParser
+
 from tqdm import tqdm
+
 from ..data.base import OnlineTrainingDatasetWrapper
 from ..data.detrac import DetracDataset
-from argparse import ArgumentParser
 
 
 def main(args):
+    """Main script function"""
     dset = DetracDataset(
         args.data_root,
         transforms=[],
@@ -25,7 +28,7 @@ def main(args):
     motc_template = "{0}, {1}, {2:.1f}, {3:.1f}, {4:.1f}, {5:.1f}, 1, -1, -1, -1\n"
     motc_buffer = []
 
-    for sample in tqdm(dset_wrapper):
+    for sample in tqdm(dset_wrapper):  # type: ignore
 
         seq = sample["seq"]
         frame_id = sample["frame_id"]
@@ -49,6 +52,7 @@ def main(args):
 
 
 def _build_ini(seq, seq_len):
+    """Utility function to generate .ini files"""
 
     template = """[Sequence]
 name={0}
@@ -62,8 +66,8 @@ imExt=.jpg"""
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("data_root")
-    parser.add_argument("--dset_mode", default="train")
+    parser.add_argument("data_root", help="Path to dataset root folder")
+    parser.add_argument("--dset_mode", default="train", help="Dataset mode")
     args = parser.parse_args()
 
     main(args)

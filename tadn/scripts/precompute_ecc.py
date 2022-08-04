@@ -1,3 +1,4 @@
+"""Script to precompute ecc affine transforms for the whole MOT dataset"""
 import numpy as np
 import cv2
 import pickle
@@ -11,7 +12,8 @@ from ..data.base import OnlineTrainingDatasetWrapper
 
 
 def main(args):
-    
+    """Main script function"""
+
     if args.dset_type == "mot-challenge":
         dset = MOTChallengeDataset(
             args.data_root,
@@ -32,7 +34,6 @@ def main(args):
         )
     else:
         raise Exception("Invalid dataset type")
-    
 
     dset_wrapper = OnlineTrainingDatasetWrapper(dset, skip_first_frame=False)
 
@@ -40,9 +41,9 @@ def main(args):
 
     template_im = None
     target_im = None
-    prev_key = None
 
-    for sample in tqdm(dset_wrapper):
+    # For each frame, compute ECC affine transform
+    for sample in tqdm(dset_wrapper):  # type: ignore
 
         seq = sample["seq"]
         frame_id = sample["frame_id"]
@@ -60,6 +61,7 @@ def main(args):
 
         template_im = target_im
 
+    # Save ecc transforms to file "data_root/ecc_[dset_mode]/ecc.pkl"
     current_file = os.path.join(
         args.data_root,
         f"ecc_{args.dset_mode}",
@@ -72,18 +74,25 @@ def main(args):
         pickle.dump(transforms, f)
 
 
+# Main entry-point
 if __name__ == "__main__":
 
     parser = ArgumentParser()
-    parser.add_argument("data_root")
+    parser.add_argument("data_root", help="Path to dataset root folder")
     parser.add_argument(
         "--dset_type",
         default="mot-challenge",
         type=str,
         choices=["mot-challenge", "detrac"],
+        help="Dataset type",
     )
-    parser.add_argument("--dset_mode", default="train")
-    parser.add_argument("--dset_version", default="MOT17", choices=["MOT17", "MOT15"])
+    parser.add_argument("--dset_mode", default="train", help="Dataset mode")
+    parser.add_argument(
+        "--dset_version",
+        default="MOT17",
+        choices=["MOT17", "MOT15"],
+        help="Dataset version. Only for MOTChallenge datasets",
+    )
 
     args = parser.parse_args()
 
