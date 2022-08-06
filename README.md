@@ -180,5 +180,5 @@ python -m tadn.scripts.validate_LAM PATH_TO_JSON_CONFIG
 
  If you use this software in your research, please cite our preprint publication:
  ```
- arXiv latex
+ latex citation placeholder
  ```
