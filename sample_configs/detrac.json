@@ -1,0 +1,131 @@
+{
+   "dataset": {
+      "type": "DETRAC",
+      "root": "PATH/TO/DETRAC/DATASET",
+      "split": "default",
+      "train_transforms": [
+        {
+            "fun": "load_app_vectors",
+            "kwargs": {
+              "data_root": "/data/DETRAC",
+              "feature_extractor": "reid",
+              "mode": "train"
+            }
+        },
+        {
+            "fun": "load_ecc_transforms",
+            "kwargs": {
+              "data_root": "PATH/TO/DETRAC/DATASET",
+              "mode": "train"
+            }
+        },
+        {
+            "fun": "filter_det",
+            "kwargs": {
+              "confidence": 0.3
+            }
+        },
+        {
+            "fun": "normalize",
+            "kwargs": {}
+        }
+      ],
+      "val_transforms": [
+        {
+            "fun": "load_app_vectors",
+            "kwargs": {
+              "data_root": "PATH/TO/DETRAC/DATASET",
+              "feature_extractor": "reid",
+              "mode": "test"
+            }
+        },
+        {
+            "fun": "load_ecc_transforms",
+            "kwargs": {
+              "data_root": "PATH/TO/DETRAC/DATASET",
+              "mode": "test"
+            }
+        },
+        {
+            "fun": "filter_det",
+            "kwargs": {
+              "confidence": 0.3
+            }
+        },
+        {
+            "fun": "normalize",
+            "kwargs": {}
+        }
+      ],
+      "detector": "EB",
+      "skip_first_frame": true,
+      "dataloader": {
+        "num_workers": 16,
+        "prefetch_factor": 3,
+        "batch_size": 1
+      }
+   },
+   "tracker": {
+      "transformer_params": {
+         "type": "dual",
+         "nhead": 2,
+         "encoder_num_layers": 2,
+         "decoder_num_layers": 2
+      },
+      "embedding_params": {
+         "app_dim": 512,
+         "app_embedding_dim": 64,
+         "spatial_embedding_dim": 64         
+      },
+      "null_target_params": {
+         "null_target_idx": -1
+      },
+      "normalize_transformer_outputs": false
+   },
+   "manager": {
+      "kill_threshold": 3,
+      "choice_assignment_params": {
+         "starting_epoch": 10,
+         "ending_epoch": 50
+      }
+   },
+   "tracklets": {
+      "motion_model": "kalman",
+      "min_kill_threshold": 3,
+      "max_kill_threshold": 30,
+      "max_kill_threshold_hits": 100
+   },
+   "model_training": {
+      "tgt2det_min_threshold": -0.13,
+      "null_target_weight": 1,
+      "learning_rate": 0.0001,
+      "allow_reflection": true,
+      "lr_scheduler_params": {
+         "type": "StepLR",
+         "step_size": 100,
+         "gamma": 0.1
+      },
+      "assignment_threshold": -0.1,
+      "assignment_metric": "ulbr1"
+   },
+   "trainer": {
+      "accelerator": "gpu",
+      "accumulate_grad_batches": 64,
+      "max_epochs": 150,
+      "check_val_every_n_epoch": 5,
+      "callbacks": [
+        {
+          "type": "model_checkpoint",
+          "save_on_train_epoch_end": false,
+          "save_top_k": 3,
+          "save_last": true,
+          "mode": "max",
+          "monitor": "val_COMBINED_MOTA",
+          "dirpath": "checkpoints/detrac"
+        }
+      ], 
+      "logger": {
+        "type": "tensorboard"
+      }
+   }
+}
