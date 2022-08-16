@@ -1,0 +1,11 @@
+torch
+torchvision
+torchmetrics
+numpy
+scipy
+pytorch_lightning
+pydantic
+opencv-python
+pandas
+git+https://github.com/tsironisbi/config4ml.git
+git+https://github.com/JonathonLuiten/TrackEval.git
