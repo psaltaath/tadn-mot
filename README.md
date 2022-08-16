@@ -178,7 +178,16 @@ python -m tadn.scripts.validate_LAM PATH_TO_JSON_CONFIG
 
 # Cite us!
 
- If you use this software in your research, please cite our preprint publication:
+If you use this software in your research, please cite our preprint publication:
+ 
+Psalta, A., Tsironis, V., & Karantzalos, K. (2022). *Transformer-based assignment decision network for multiple object tracking.* arXiv preprint arXiv:2208.03571.
+ 
+Bibtex: 
  ```
- latex citation placeholder
+@article{psalta2022transformer,
+  title={Transformer-based assignment decision network for multiple object tracking},
+  author={Psalta, Athena and Tsironis, Vasileios and Karantzalos, Konstantinos},
+  journal={arXiv preprint arXiv:2208.03571},
+  year={2022}
+}
  ```
