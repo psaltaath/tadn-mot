@@ -7,7 +7,7 @@
         {
             "fun": "load_app_vectors",
             "kwargs": {
-              "data_root": "/data/DETRAC",
+              "data_root": "PATH/TO/DETRAC/DATASET",
               "feature_extractor": "reid",
               "mode": "train"
             }
