@@ -5,7 +5,7 @@ Data association is a crucial component for any multiple object tracking (MOT) m
 
 ![TADN MOT tracking pipeline](assets/mot_tracker.png)
 
-Transformer-based Assignment Decision Network (TADN) tackles data association without the need of any explicit optimization during inference. In particular, TADN can **directly infer assignment pairs** between detections and active targets in a single forward pass of the network. TADN is integrated in a rather simple MOT framework coupled with a novel training strategy for efficient end-to-end training.
+Transformer-based Assignment Decision Network (TADN) tackles data association without the need of any explicit optimization during inference. In particular, TADN can **directly infer assignment pairs** between detections and active targets in a single forward pass of the network. TADN is integrated in a rather simple MOT framework coupled with a novel training strategy for efficient end-to-end training. For more information check our pre-print publication at https://arxiv.org/abs/2208.03571
 
 ![TADN possible architectures](assets/branches.png)
 
