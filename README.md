@@ -171,9 +171,9 @@ To estimate expected tracking performance when training TADN using the online tr
 ```python
 python -m tadn.scripts.validate_LAM PATH_TO_JSON_CONFIG
 ```
-### Pre-trained TADN models
+## Pre-trained TADN models
 
-***COMING SOON!!!***
+Download pretrained models and their json configs for MOT17 and UA-DETRAC from [zenodo](https://zenodo.org/record/7193331#.Y0fIqUpBy-Y) !
 
 
 # Cite us!
