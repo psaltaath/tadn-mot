@@ -244,17 +244,22 @@ class GenericManager(AbstractManager):
 
     def _perform_assignments(
         self, similarity_matrix: torch.Tensor
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Compute assignments using the Hungarian algorithm
 
         Args:
             similarity_matrix (torch.Tensor): (num_detections, num_targets) Similarity matrix
 
         Returns:
-            np.ndarray: assigned detection indices
-            np.ndarray: assigned target indices
+            torch.Tensor: assigned detection indices
+            torch.Tensor: assigned target indices
         """
-        return linear_sum_assignment(similarity_matrix.cpu().numpy(), maximize=True)
+        det_ids, tgt_ids = linear_sum_assignment(
+            similarity_matrix.cpu().numpy(), maximize=True
+        )
+        return torch.from_numpy(det_ids).type(torch.long), torch.from_numpy(
+            tgt_ids
+        ).type(torch.long)
 
     def _pre_step(
         self,
@@ -423,9 +428,9 @@ class ModelAssignmentManager(GenericManager):
         """
 
         if similarity_matrix.numel() == 0:
-            return torch.empty(0, device=similarity_matrix.device), torch.empty(
-                0, device=similarity_matrix.device
-            )
+            return torch.empty(
+                0, device=similarity_matrix.device, dtype=torch.long
+            ), torch.empty(0, device=similarity_matrix.device, dtype=torch.long)
         # Calculate detection assignments given max score (Det2Tgt)
         a_det2tgt = similarity_matrix.argmax(dim=-1)
 
