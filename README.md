@@ -5,7 +5,7 @@ Data association is a crucial component for any multiple object tracking (MOT) m
 
 ![TADN MOT tracking pipeline](assets/mot_tracker.png)
 
-Transformer-based Assignment Decision Network (TADN) tackles data association without the need of any explicit optimization during inference. In particular, TADN can **directly infer assignment pairs** between detections and active targets in a single forward pass of the network. TADN is integrated in a rather simple MOT framework coupled with a novel training strategy for efficient end-to-end training.
+Transformer-based Assignment Decision Network (TADN) tackles data association without the need of any explicit optimization during inference. In particular, TADN can **directly infer assignment pairs** between detections and active targets in a single forward pass of the network. TADN is integrated in a rather simple MOT framework coupled with a novel training strategy for efficient end-to-end training. For more information check our pre-print publication at https://arxiv.org/abs/2208.03571
 
 ![TADN possible architectures](assets/branches.png)
 
@@ -87,22 +87,22 @@ python -m tadn.scripts.detrac_generate_MOTC_gt PATH_TO_DATASET_ROOT --dset_mode 
 ### Precompute appearance vectors:
 - MOT17 & Re-id CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type mot-challenge --dset_version MOT17 --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type mot-challenge --dset_version MOT17 --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
 ```
 
 - MOT17 & Resnet-18 CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
 ```
 
 - UA-DETRAC & Re-id CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type detrac --detector EB --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type detrac --detector EB --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
 ```
 
 - MOT17 & Resnet-18 CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
 ```
 
 ### Camera Motion Compensation
