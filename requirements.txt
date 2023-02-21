@@ -1,7 +1,10 @@
 torch
 torchvision
 torchmetrics
+torchreid
 numpy
+gdown
+tensorboard
 scipy
 pytorch_lightning
 pydantic

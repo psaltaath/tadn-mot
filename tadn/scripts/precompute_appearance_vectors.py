@@ -93,10 +93,16 @@ def main(args):
     else:
         feature_extractor = ReidFeatures(args.reid_ckpt)
 
-    base_folder = osp.join(
-        args.data_root,
-        f"appearance_vectors_{args.feature_extractor}_{args.detector}_{args.dset_mode}",
-    )
+    if args.dset_type == "detrac":
+        base_folder = osp.join(
+            args.data_root,
+            f"appearance_vectors_{args.feature_extractor}_{args.detector}_{args.dset_mode}",
+        )
+    else:
+        base_folder = osp.join(
+            args.data_root,
+            f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
+        )
     if not osp.exists(base_folder):
         os.makedirs(base_folder)
 

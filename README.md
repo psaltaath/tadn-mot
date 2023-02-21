@@ -87,22 +87,22 @@ python -m tadn.scripts.detrac_generate_MOTC_gt PATH_TO_DATASET_ROOT --dset_mode 
 ### Precompute appearance vectors:
 - MOT17 & Re-id CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type mot-challenge --dset_version MOT17 --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type mot-challenge --dset_version MOT17 --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
 ```
 
 - MOT17 & Resnet-18 CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
 ```
 
 - UA-DETRAC & Re-id CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type detrac --detector EB --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type detrac --detector EB --feature_extractor reid --reid_ckpt PATH_TO_REID_CHECKPOINT
 ```
 
 - MOT17 & Resnet-18 CNN features
 ```python
-python -m tadn.scripts.precompute_appearance_vectors --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
+python -m tadn.scripts.precompute_appearance_vectors PATH_TO_DATASET_ROOT --dset_type mot-challenge --dset_version MOT17 --feature_extractor resnet18
 ```
 
 ### Camera Motion Compensation
