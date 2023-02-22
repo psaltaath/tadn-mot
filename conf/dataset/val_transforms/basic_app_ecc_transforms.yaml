@@ -1,0 +1,14 @@
+- fun: load_app_vectors
+  kwargs:
+    data_root: PATH/TO/DATASET
+    feature_extractor: reid
+    mode: test
+- fun: load_ecc_transforms
+  kwargs:
+    data_root: PATH/TO/DATASET
+    mode: test
+- fun: filter_det
+  kwargs:
+    confidence: 0.3
+- fun: normalize
+  kwargs: {}

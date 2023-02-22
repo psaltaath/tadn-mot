@@ -1,0 +1,12 @@
+transformer_params:
+  type: dual
+  nhead: 2
+  encoder_num_layers: 2
+  decoder_num_layers: 2
+embedding_params:
+  app_dim: 512
+  app_embedding_dim: 64
+  spatial_embedding_dim: 64
+null_target_params:
+  null_target_idx: -1
+normalize_transformer_outputs: false

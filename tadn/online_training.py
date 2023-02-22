@@ -1,7 +1,9 @@
 import os
 import random
-from argparse import ArgumentParser
 from typing import Any, Dict, Optional, Tuple
+import hydra
+from omegaconf import DictConfig
+from pprint import pprint
 
 import numpy as np
 import pytorch_lightning as pl
@@ -10,6 +12,7 @@ from scipy.optimize import linear_sum_assignment
 from torch.nn import functional as F
 
 # Local imports
+from .utils.convenience import get_evaluation_benchmark, get_tracker
 from .components import tracklets
 from .components.transformer import TADN
 from .config.data import MOTDatasetConfig
@@ -654,7 +657,7 @@ class OnlineTraining(pl.LightningModule):
         return obj
 
 
-def init_model_from_config(cfg: ExperimentConfig) -> OnlineTraining:
+def init_model_from_config(cfg: DictConfig) -> OnlineTraining:
     """Initialize model, manager, tracker and components from given configuration.
 
     Args:
@@ -663,46 +666,51 @@ def init_model_from_config(cfg: ExperimentConfig) -> OnlineTraining:
     Returns:
         OnlineTraining: Model to train
     """
-    tracker: TADN = cfg.tracker.get_tracker()
-    manager = OnlineManager(tracker=tracker, **cfg.manager.dict())
-    assert isinstance(cfg.dataset, MOTDatasetConfig)
+    tracker: TADN = get_tracker(cfg.tracker)
+    manager = OnlineManager(
+        tracker=tracker, choice_assignment_params=cfg.manager.choice_assignment_params
+    )
     model = OnlineTraining(
         manager=manager,
-        benchmark=cfg.dataset.evaluation_benchmark,
-        **cfg.model_training.kwargs,
+        benchmark=get_evaluation_benchmark(cfg.dataset.type),
+        tgt2det_min_threshold=cfg.model_training.tgt2det_min_threshold,
+        null_target_weight=cfg.model_training.null_target_weight,
+        learning_rate=cfg.model_training.learning_rate,
+        allow_reflection=cfg.model_training.allow_reflection,
+        lr_scheduler_params=cfg.model_training.lr_scheduler_params,
+        assignment_threshold=cfg.model_training.assignment_threshold,
     )
     tracklets.set_motion_model(cfg.tracklets.motion_model)
-    tracklets.set_kill_thresholds(**cfg.tracklets.kill_threshold_opts)
+    tracklets.set_kill_thresholds(
+        min_t=cfg.tracklets.min_kill_threshold,
+        max_t=cfg.tracklets.max_kill_threshold,
+        max_hits=cfg.tracklets.max_kill_threshold_hits,
+    )
     metrics.set_metric(cfg.model_training.assignment_metric)
     return model
 
 
-def main(args):
+@hydra.main(version_base=None, config_path="../conf", config_name="online_training")
+def main(cfg: DictConfig):
     """Main function
 
     Args:
         args (Namespace): Config arguments from command line
     """
 
-    cfg = ExperimentConfig.parse_file(args.json_config)
-
-    print(cfg)
     model = init_model_from_config(cfg)
+    print(model)
 
-    assert isinstance(cfg.dataset, MOTDatasetConfig)
-    train_dloader, val_dloader = cfg.dataset.build_dataloaders(
-        batch_size=1, shuffle=False
-    )
+    # assert isinstance(cfg.dataset, MOTDatasetConfig)
+    # train_dloader, val_dloader = cfg.dataset.build_dataloaders(
+    #     batch_size=1, shuffle=False
+    # )
 
-    trainer: pl.Trainer = cfg.trainer.trainer
+    # trainer: pl.Trainer = cfg.trainer.trainer
 
-    trainer.fit(model, train_dataloaders=train_dloader, val_dataloaders=val_dloader)
+    # trainer.fit(model, train_dataloaders=train_dloader, val_dataloaders=val_dloader)
 
 
 # Main entry-point
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("json_config", type=str, help="Path to json configuration file")
-
-    args = parser.parse_args()
-    main(args)
+    main()

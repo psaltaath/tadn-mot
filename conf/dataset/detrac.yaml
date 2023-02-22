@@ -1,0 +1,10 @@
+type: DETRAC
+root: PATH/TO/DETRAC/DATASET
+split: default
+skip_first_frame: true
+detector: EB
+
+defaults:
+  - dataloader: basic_dataloader
+  - train_transforms: basic_app_ecc_transforms
+  - val_transforms: basic_app_ecc_transforms

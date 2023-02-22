@@ -1,0 +1,4 @@
+motion_model: kalman
+min_kill_threshold: 3
+max_kill_threshold: 30
+max_kill_threshold_hits: 100

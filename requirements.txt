@@ -10,5 +10,8 @@ pytorch_lightning
 pydantic
 opencv-python
 pandas
+hydra-core
+filterpy
+pycocotools
 git+https://github.com/tsironisbi/config4ml.git
 git+https://github.com/JonathonLuiten/TrackEval.git

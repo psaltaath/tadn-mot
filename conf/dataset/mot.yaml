@@ -1,0 +1,10 @@
+type: mot17
+root: PATH/TO/MOT17/DATASET
+split: default
+skip_first_frame: true
+detector: null
+
+defaults:
+  - dataloader: basic_dataloader
+  - train_transforms: basic_app_ecc_transforms
+  - val_transforms: basic_app_ecc_transforms

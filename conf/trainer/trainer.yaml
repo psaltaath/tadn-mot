@@ -1,0 +1,14 @@
+accelerator: gpu
+accumulate_grad_batches: 64
+max_epochs: 150
+check_val_every_n_epoch: 5
+callbacks:
+  - type: model_checkpoint
+    save_on_train_epoch_end: false
+    save_top_k: 3
+    save_last: true
+    mode: max
+    monitor: val_COMBINED_MOTA
+    dirpath: checkpoints/tadn
+logger:
+  type: tensorboard
