@@ -265,6 +265,14 @@ def nms_det(iou_threshold: float = 0.3, retain_scores=False):
 
     return apply
 
+AVAILABLE_TRANSFORMS = {
+    "normalize": normalize,
+    "add_noise_det": add_noise_det,
+    "filter_det": filter_det,
+    "nms_det": nms_det,
+    "load_app_vectors": load_app_vectors,
+    "load_ecc_transforms": load_ecc_transforms
+}
 
 # Gather all available transforms
 def get_all_transforms():

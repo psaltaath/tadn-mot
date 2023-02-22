@@ -10,6 +10,7 @@ from scipy.optimize import linear_sum_assignment
 from torch.nn import functional as F
 
 # Local imports
+from .utils.convenience import get_trainer
 from .components import tracklets
 from .components.transformer import TADN
 from .config.data import MOTDatasetConfig
@@ -694,7 +695,7 @@ def main(args):
         batch_size=1, shuffle=False
     )
 
-    trainer: pl.Trainer = cfg.trainer.trainer
+    trainer: pl.Trainer = get_trainer(cfg.trainer)
 
     trainer.fit(model, train_dataloaders=train_dloader, val_dataloaders=val_dloader)
 
