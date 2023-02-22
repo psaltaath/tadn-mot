@@ -9,6 +9,7 @@ callbacks:
     save_last: true
     mode: max
     monitor: val_COMBINED_MOTA
-    dirpath: checkpoints/tadn
+    dirpath: PATH/TO/CKPT/DIR
 logger:
   type: tensorboard
+  save_dir: PATH/TO/SAVE/DIR

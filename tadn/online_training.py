@@ -12,6 +12,7 @@ from scipy.optimize import linear_sum_assignment
 from torch.nn import functional as F
 
 # Local imports
+from .utils.convenience import get_trainer
 from .utils.convenience import get_evaluation_benchmark, get_tracker
 from .components import tracklets
 from .components.transformer import TADN
@@ -48,7 +49,7 @@ class OnlineManager(ModelAssignmentManager):
 
         super().__init__(*args, **kwargs)
 
-        self.current_epoch = None
+        self.current_epoch = -1
         self.assignment_loss = torch.tensor(
             0.0, dtype=torch.float32, requires_grad=True
         )
@@ -706,7 +707,7 @@ def main(cfg: DictConfig):
     #     batch_size=1, shuffle=False
     # )
 
-    # trainer: pl.Trainer = cfg.trainer.trainer
+    trainer: pl.Trainer = get_trainer(cfg.trainer)
 
     # trainer.fit(model, train_dataloaders=train_dloader, val_dataloaders=val_dloader)
 
