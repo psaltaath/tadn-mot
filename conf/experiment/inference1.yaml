@@ -1,0 +1,10 @@
+# @package _global_
+ckpt_path: /trained_od/tadn/motc.ckpt
+
+dataset:
+  root: /data/motc
+  app_feature_extractor: resnet18
+
+defaults:
+  - override /dataset/train_transforms: basic_app_transforms
+  - override /dataset/val_transforms: basic_app_transforms

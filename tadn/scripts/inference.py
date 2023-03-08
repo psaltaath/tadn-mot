@@ -1,54 +1,43 @@
 """Script to perform inference using a pretrained model"""
-from argparse import ArgumentParser
+from omegaconf import DictConfig
 
 import pytorch_lightning as pl
 import torch
+import hydra
 
-from ..config.data import MOTDatasetConfig
-from ..config.experiment import ExperimentConfig
+from ..data.utils import build_datasets, build_dataloaders
 from ..online_training import init_model_from_config
 
 
-def load_from_ckpt(ckpt_file, cfg_file):
+def load_from_ckpt(cfg: DictConfig):
     """Load model from checkpoint"""
-    cfg = ExperimentConfig.parse_file(cfg_file)
 
     model = init_model_from_config(cfg)
 
-    ckpt = torch.load(ckpt_file)
+    ckpt = torch.load(cfg.ckpt_path)
     model.load_state_dict(ckpt["state_dict"])
 
     return model
 
 
-def main(args):
+@hydra.main(version_base=None, config_path="../../conf", config_name="inference")
+def main(cfg: DictConfig):
     """Main script function"""
-    model = load_from_ckpt(args.ckpt, args.json_config)
+    model = load_from_ckpt(cfg)
     print(model)
 
-    cfg = ExperimentConfig.parse_file(args.json_config)
-    assert isinstance(cfg.dataset, MOTDatasetConfig)
     cfg.dataset.skip_first_frame = False
-    train_dloader, val_dloader = cfg.dataset.build_dataloaders()
+    val_dset = build_datasets(dataset_cfg=cfg.dataset, skip_train=True)
+    val_dloader = build_dataloaders(
+        val_dset, dataloader_cfg=cfg.dataset.dataloader
+    )
 
-    dloaders = [val_dloader]
-    if args.inference_train:
-        dloaders.append(train_dloader)
+    print(len(val_dset))
 
     trainer = pl.Trainer()
-    trainer.test(model, dataloaders=dloaders)
+    trainer.test(model, dataloaders=val_dloader)
 
 
 # Main entry-point
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("ckpt", type=str, help="Path to checkpoint")
-    parser.add_argument(
-        "json_config", type=str, help="Path to json config used for training"
-    )
-    parser.add_argument(
-        "--inference_train", action="store_true", help="Inference also on training set"
-    )
-
-    args = parser.parse_args()
-    main(args)
+    main()

@@ -1,11 +1,11 @@
 - fun: load_app_vectors
   kwargs:
-    data_root: PATH/TO/DATASET
-    feature_extractor: reid
+    data_root: ${dataset.root}
+    feature_extractor: ${dataset.app_feature_extractor}
     mode: train
 - fun: load_ecc_transforms
   kwargs:
-    data_root: PATH/TO/DATASET
+    data_root: ${dataset.root}
     mode: train
 - fun: filter_det
   kwargs:

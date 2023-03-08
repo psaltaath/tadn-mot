@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 
 from .base import MOTDataset
-from .utils import MOTChallengeDetections
+from .mot_challenge import MOTChallengeDetections
 
 
 class DetracDataset(MOTDataset):
@@ -100,7 +100,6 @@ class DetracDataset(MOTDataset):
             for frame_id, frame_el in enumerate(
                 frame_annotation_elements
             ):  # 0-based frame indexing
-
                 img_url = os.path.join(seq_data_dir, f"img{frame_id+1:05d}.jpg")
                 dets = self.detections_provider.get(frame_id=frame_id + 1, seq=seq)
                 track_ids, gt = self._parse_frame_xml_element(frame_el)

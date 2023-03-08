@@ -2,3 +2,6 @@ __pycache__/
 legacy/
 .devcontainer.json
 outputs/
+test_results/
+lightning_logs/
+.empty/

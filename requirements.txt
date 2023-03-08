@@ -5,6 +5,7 @@ torchreid
 numpy
 gdown
 tensorboard
+tabulate
 scipy
 pytorch_lightning
 pydantic

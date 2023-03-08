@@ -1,8 +1,9 @@
 type: mot17
-root: PATH/TO/MOT17/DATASET
+root: ???
 split: default
 skip_first_frame: true
-detector: null
+detector: ""
+app_feature_extractor: reid
 
 defaults:
   - dataloader: basic_dataloader

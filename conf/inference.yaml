@@ -1,0 +1,9 @@
+ckpt_path: ???
+inference_train: false
+
+defaults:
+  - dataset: mot
+  - manager: manager
+  - model_training: model_training
+  - tracker: tadn
+  - tracklets: tracklets

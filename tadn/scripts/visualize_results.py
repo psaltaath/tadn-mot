@@ -1,4 +1,3 @@
-
 import pandas as pd
 from argparse import ArgumentParser
 import cv2
@@ -18,9 +17,26 @@ def get_img_detrac(frame_id, seq, data_root, mode):
     return im
 
 
+def get_img_motc(frame_id, seq, data_root, mode):
+    im = cv2.imread(
+        os.path.join(
+            data_root,
+            mode,
+            seq,
+            "img1",
+            f"{frame_id+1:06d}.jpg",
+        )
+    )
+    return im
+
+
 def main(args):
     if args.dset_type == "detrac":
         get_img = lambda fid: get_img_detrac(
+            fid, args.seq_name, args.data_root, args.dset_mode
+        )
+    elif args.dset_type == "motc":
+        get_img = lambda fid: get_img_motc(
             fid, args.seq_name, args.data_root, args.dset_mode
         )
     else:
@@ -58,7 +74,7 @@ if __name__ == "__main__":
     parser.add_argument("seq_name")
     parser.add_argument("results_dir")
     parser.add_argument("data_root")
-    parser.add_argument("--dset_type", choices=["detrac"])
+    parser.add_argument("--dset_type", choices=["detrac", "motc"])
     parser.add_argument("--dset_mode", default="test")
 
     args = parser.parse_args()

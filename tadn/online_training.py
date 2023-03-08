@@ -24,6 +24,7 @@ from .mot.managers import ModelAssignmentManager
 from .utils.bbox import bbox_xywh2xyxy, convert_MOTC_format
 from .utils.scheduler import SigmoidScheduler
 from .utils.tracklets import truncate_tracklets_MOTC_format
+from .data.utils import build_datasets, build_dataloaders
 
 
 class OnlineManager(ModelAssignmentManager):
@@ -702,14 +703,14 @@ def main(cfg: DictConfig):
     model = init_model_from_config(cfg)
     print(model)
 
-    # assert isinstance(cfg.dataset, MOTDatasetConfig)
-    # train_dloader, val_dloader = cfg.dataset.build_dataloaders(
-    #     batch_size=1, shuffle=False
-    # )
+    train_dset, val_dset = build_datasets(dataset_cfg=cfg.dataset)
+    train_dloader, val_dloader = build_dataloaders(
+        train_dset=train_dset, val_dset=val_dset, dataloader_cfg=cfg.dataset.dataloader
+    )
 
     trainer: pl.Trainer = get_trainer(cfg.trainer)
 
-    # trainer.fit(model, train_dataloaders=train_dloader, val_dataloaders=val_dloader)
+    trainer.fit(model, train_dataloaders=train_dloader, val_dataloaders=val_dloader)
 
 
 # Main entry-point

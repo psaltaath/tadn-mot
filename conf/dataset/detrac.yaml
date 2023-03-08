@@ -1,5 +1,5 @@
 type: DETRAC
-root: PATH/TO/DETRAC/DATASET
+root: ???
 split: default
 skip_first_frame: true
 detector: EB
