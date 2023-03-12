@@ -5,3 +5,4 @@ outputs/
 test_results/
 lightning_logs/
 .empty/
+.devcontainer/

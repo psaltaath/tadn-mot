@@ -123,7 +123,7 @@ class MOTChallengeDataset(MOTDataset):
                 seqs = glob.glob(os.path.join(self.data_root, "train", "*"))
             else:
                 seqs = glob.glob(
-                    os.path.join(self.data_root, "train", f"MOT*{self.detector}")
+                    os.path.join(self.data_root, "train", f"*{self.detector}")
                 )
         else:
             seqs = glob.glob(

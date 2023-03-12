@@ -116,7 +116,6 @@ def main(args):
     feats_dict = {}
 
     for sample in tqdm(dset_wrapper):  # type: ignore
-
         seq = sample["seq"]
         frame_id = sample["frame_id"]
 
@@ -141,13 +140,13 @@ def main(args):
                             real_ymin : real_ymin + real_h,
                             real_xmin : real_xmin + real_w,
                         ]
-                    )
+                    ).cpu()
                 )
 
         if len(feat_list) == 0:
             feats = torch.empty(0)
         else:
-            feats = torch.cat(feat_list, dim=0).cpu()
+            feats = torch.cat(feat_list, dim=0)
 
         # Key-value based features storage
         key = f"{seq}_{frame_id}"
@@ -175,7 +174,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-
     parser = ArgumentParser()
     parser.add_argument("data_root", help="Path to dataset root folder")
     parser.add_argument(
