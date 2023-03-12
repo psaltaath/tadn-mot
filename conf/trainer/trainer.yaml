@@ -1,4 +1,5 @@
 accelerator: gpu
+devices: 1
 accumulate_grad_batches: 64
 max_epochs: 150
 check_val_every_n_epoch: 5

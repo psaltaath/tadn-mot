@@ -8,6 +8,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
+
 def parse_callbacks(callback_cfgs: list) -> list:
     cbs = []
     for cb in callback_cfgs:
@@ -19,28 +20,29 @@ def parse_callbacks(callback_cfgs: list) -> list:
             raise NotImplementedError
     return cbs
 
+
 def parse_logger(logger_cfg: DictConfig):
     if logger_cfg.type == "tensorboard":
         return TensorBoardLogger(save_dir=logger_cfg.save_dir)
     else:
         raise NotImplementedError
 
-def get_trainer(trainer_cfg: DictConfig) -> pl.Trainer:
 
+def get_trainer(trainer_cfg: DictConfig) -> pl.Trainer:
     callbacks = parse_callbacks(trainer_cfg.callbacks)
     logger = parse_logger(trainer_cfg.logger)
 
     trainer = pl.Trainer(
         accelerator=trainer_cfg.accelerator,
+        devices=trainer_cfg.devices,
         accumulate_grad_batches=trainer_cfg.accumulate_grad_batches,
         max_epochs=trainer_cfg.max_epochs,
         check_val_every_n_epoch=trainer_cfg.check_val_every_n_epoch,
         callbacks=callbacks,
-        logger=logger
+        logger=logger,
     )
 
     return trainer
-
 
 
 def get_tracker(tracker_cfg: DictConfig):
@@ -82,6 +84,3 @@ def get_evaluation_benchmark(dataset_type: str) -> str:
     elif "DETRAC" in dataset_type.upper():
         return "DETRAC"
     raise AssertionError("Invalid dataset type for evaluation benchmark")
-
-    
-
