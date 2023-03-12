@@ -26,9 +26,13 @@ class AppVecProvider:
             feature_extractor (str, optional): Feature extractor str identifier. Defaults to "resnet18".
             detector (str, optional): Object detector str identifier. Defaults to "SDP".
         """
-        self.app_vec_dir = os.path.join(
-            data_root, f"appearance_vectors_{feature_extractor}_{detector}_{mode}"
-        )
+
+        app_vec_dirname = f"appearance_vectors_{feature_extractor}_"
+        if detector != "":
+            app_vec_dirname += f"{detector}_"
+        app_vec_dirname += f"{mode}"
+
+        self.app_vec_dir = os.path.join(data_root, app_vec_dirname)
 
         with open(
             os.path.join(self.app_vec_dir, "ap_vectors.voc"),
@@ -265,14 +269,16 @@ def nms_det(iou_threshold: float = 0.3, retain_scores=False):
 
     return apply
 
+
 AVAILABLE_TRANSFORMS = {
     "normalize": normalize,
     "add_noise_det": add_noise_det,
     "filter_det": filter_det,
     "nms_det": nms_det,
     "load_app_vectors": load_app_vectors,
-    "load_ecc_transforms": load_ecc_transforms
+    "load_ecc_transforms": load_ecc_transforms,
 }
+
 
 # Gather all available transforms
 def get_all_transforms():

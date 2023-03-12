@@ -2,6 +2,7 @@ accelerator: gpu
 accumulate_grad_batches: 64
 max_epochs: 150
 check_val_every_n_epoch: 5
+workdir: ???
 callbacks:
   - type: model_checkpoint
     save_on_train_epoch_end: false
@@ -9,7 +10,7 @@ callbacks:
     save_last: true
     mode: max
     monitor: val_COMBINED_MOTA
-    dirpath: ???
+    dirpath: ${trainer.workdir}/ckpts
 logger:
   type: tensorboard
-  save_dir: ???
+  save_dir: ${trainer.workdir}/logs

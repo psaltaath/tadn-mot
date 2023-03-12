@@ -3,7 +3,6 @@ import random
 from typing import Any, Dict, Optional, Tuple
 import hydra
 from omegaconf import DictConfig
-from pprint import pprint
 
 import numpy as np
 import pytorch_lightning as pl
@@ -16,8 +15,6 @@ from .utils.convenience import get_trainer
 from .utils.convenience import get_evaluation_benchmark, get_tracker
 from .components import tracklets
 from .components.transformer import TADN
-from .config.data import MOTDatasetConfig
-from .config.experiment import ExperimentConfig
 from .mot import metrics
 from .mot.eval import MOTEvaluator, MOTInference
 from .mot.managers import ModelAssignmentManager
@@ -200,7 +197,7 @@ class OnlineTraining(pl.LightningModule):
         self.reflect_x: Optional[bool] = None
         self.reflect_y: Optional[bool] = None
 
-        self.lr_scheduler_params = lr_scheduler_params
+        self.lr_scheduler_params = dict(lr_scheduler_params)
 
         self.assign_threshold = assignment_threshold
 
@@ -705,7 +702,7 @@ def main(cfg: DictConfig):
 
     train_dset, val_dset = build_datasets(dataset_cfg=cfg.dataset)
     train_dloader, val_dloader = build_dataloaders(
-        train_dset=train_dset, val_dset=val_dset, dataloader_cfg=cfg.dataset.dataloader
+        train_dset, val_dset, dataloader_cfg=cfg.dataset.dataloader
     )
 
     trainer: pl.Trainer = get_trainer(cfg.trainer)

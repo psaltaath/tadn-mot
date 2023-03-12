@@ -108,6 +108,7 @@ class MOTChallengeDataset(MOTDataset):
             self.category_ids = [-1]
 
         self.detections_provider = None
+        self.has_gt_annotations = True
 
         super().__init__(*args, **kwargs)
 
@@ -142,10 +143,6 @@ class MOTChallengeDataset(MOTDataset):
 
         parser = ConfigParser()
 
-        self.has_gt_annotations = (
-            True if self.mode in ["train", "train_50", "val_50"] else False
-        )
-
         self.db = []
 
         for seq in self._retrieve_sequences():
@@ -157,9 +154,11 @@ class MOTChallengeDataset(MOTDataset):
 
             seq_length = int(parser.get("Sequence", "seqLength"))
 
-            if self.has_gt_annotations:
+            seq_has_annotations = os.path.exists(os.path.join(seq, "gt", "gt.txt"))
+            if seq_has_annotations:
                 gt = pd.read_csv(os.path.join(seq, "gt", "gt.txt"), header=None).values  # type: ignore
             else:
+                self.has_gt_annotations = False
                 gt = None
 
             if self.mode in ["train", "test"]:
@@ -189,7 +188,7 @@ class MOTChallengeDataset(MOTDataset):
                 }
                 sample_dict.update({"detections": dets})
 
-                if self.has_gt_annotations:
+                if seq_has_annotations:
                     assert gt is not None
                     gt_instance = gt[gt[:, 0] == frame_id + 1]
                     # Filter for category type...

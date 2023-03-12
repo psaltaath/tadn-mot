@@ -3,6 +3,7 @@
     data_root: ${dataset.root}
     feature_extractor: ${dataset.app_feature_extractor}
     mode: train
+    detector: ${dataset.detector}
 - fun: filter_det
   kwargs:
     confidence: 0.3
