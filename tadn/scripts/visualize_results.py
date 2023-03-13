@@ -18,15 +18,18 @@ def get_img_detrac(frame_id, seq, data_root, mode):
 
 
 def get_img_motc(frame_id, seq, data_root, mode):
-    im = cv2.imread(
-        os.path.join(
-            data_root,
-            mode,
-            seq,
-            "img1",
-            f"{frame_id+1:06d}.jpg",
-        )
+    img_file = os.path.join(
+        data_root,
+        mode,
+        seq,
+        "img1",
+        f"{frame_id+1:06d}.jpg",
     )
+
+    if not os.path.exists(img_file):
+        return None
+
+    im = cv2.imread(img_file)
     return im
 
 
@@ -46,8 +49,10 @@ def main(args):
     frame = get_img(frame_id)
     assert frame is not None
 
+    out_video_file = os.path.join(args.results_dir, f"{args.seq_name}.mp4")
+    print(out_video_file)
     out = cv2.VideoWriter(
-        os.path.join(args.results_dir, f"{args.seq_name}.mp4"),
+        out_video_file,
         cv2.VideoWriter_fourcc("m", "p", "4", "v"),
         25,
         (frame.shape[1], frame.shape[0]),
