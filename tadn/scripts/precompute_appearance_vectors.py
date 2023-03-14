@@ -103,8 +103,8 @@ def main(args):
         )
 
         base_folder = osp.join(
-            args.data_root,
-            f"appearance_vectors_{args.feature_extractor}",
+            os.path.dirname(args.data_root),
+            f"{os.path.splitext(os.path.basename(args.data_root))[0]}_appearance_vectors_{args.feature_extractor}",
         )
     else:
         raise Exception("Invalid dataset type")
