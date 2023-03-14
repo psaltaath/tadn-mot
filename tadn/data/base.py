@@ -260,7 +260,7 @@ class SingleVideoDataset(MOTDataset):
         ret, frame = self.cap.read()
         assert ret
 
-        sample.update({"frame_data": cv2.imread(frame)})
+        sample.update({"frame_data": frame})
 
         return sample
 
