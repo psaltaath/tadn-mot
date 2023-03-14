@@ -12,7 +12,7 @@ import torchvision.models as models
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 from tqdm import tqdm
 
-from ..data.base import OnlineTrainingDatasetWrapper
+from ..data.base import OnlineTrainingDatasetWrapper, SingleVideoDataset
 from ..data.detrac import DetracDataset
 
 # from .data import OnlineTrainingDataset, load_frame_data
@@ -74,6 +74,11 @@ def main(args):
             mode=args.dset_mode,
             version=args.dset_version,
         )
+
+        base_folder = osp.join(
+            args.data_root,
+            f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
+        )
     elif args.dset_type == "detrac":
         dset = DetracDataset(
             args.data_root,
@@ -83,28 +88,36 @@ def main(args):
             mode=args.dset_mode,
             detector=args.detector,
         )
+
+        base_folder = osp.join(
+            args.data_root,
+            f"appearance_vectors_{args.feature_extractor}_{args.detector}_{args.dset_mode}",
+        )
+    elif args.dset_type == "single-video":
+        assert os.path.exists(args.data_root)
+        assert os.path.exists(args.detections)
+        dset = SingleVideoDataset(
+            video_file=args.data_root,
+            detections_file=args.detections,
+            load_frame_data=True,
+        )
+
+        base_folder = osp.join(
+            args.data_root,
+            f"appearance_vectors_{args.feature_extractor}",
+        )
     else:
         raise Exception("Invalid dataset type")
 
-    dset_wrapper = OnlineTrainingDatasetWrapper(dset, skip_first_frame=False)
+    if not osp.exists(base_folder):
+        os.makedirs(base_folder)
+
+    # dset_wrapper = OnlineTrainingDatasetWrapper(dset, skip_first_frame=False)
 
     if args.feature_extractor == "resnet18":
         feature_extractor = Resnet18Features()
     else:
         feature_extractor = ReidFeatures(args.reid_ckpt)
-
-    if args.dset_type == "detrac":
-        base_folder = osp.join(
-            args.data_root,
-            f"appearance_vectors_{args.feature_extractor}_{args.detector}_{args.dset_mode}",
-        )
-    else:
-        base_folder = osp.join(
-            args.data_root,
-            f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
-        )
-    if not osp.exists(base_folder):
-        os.makedirs(base_folder)
 
     current_file_idx = 0
     current_file = osp.join(
@@ -115,7 +128,7 @@ def main(args):
     feats_vocabulary = {}
     feats_dict = {}
 
-    for sample in tqdm(dset_wrapper):  # type: ignore
+    for sample in tqdm(dset):  # type: ignore
         seq = sample["seq"]
         frame_id = sample["frame_id"]
 
@@ -175,7 +188,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("data_root", help="Path to dataset root folder")
+    parser.add_argument("data_root", help="Path to dataset root folder / video file")
     parser.add_argument(
         "--samples_per_file",
         default=1024,
@@ -186,7 +199,7 @@ if __name__ == "__main__":
         "--dset_type",
         default="mot-challenge",
         type=str,
-        choices=["mot-challenge", "detrac"],
+        choices=["mot-challenge", "detrac", "single-video"],
         help="Dataset type",
     )
     parser.add_argument("--dset_mode", default="train", help="Dataset mode")
@@ -213,6 +226,12 @@ if __name__ == "__main__":
         default="EB",
         choices=["EB", "frcnn"],
         help="Selected detector. Only for UA-DETRAC.",
+    )
+
+    parser.add_argument(
+        "--detections",
+        default=None,
+        help="Path to detections json. Only for single-video mode",
     )
 
     args = parser.parse_args()

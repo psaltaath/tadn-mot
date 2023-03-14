@@ -1,7 +1,11 @@
 from copy import deepcopy
+import os
 from typing import Iterable, List
 import numpy as np
 from torch.utils.data import Dataset
+import cv2
+
+from .detection import RawDictDetections
 
 
 class MOTDataset(Dataset):
@@ -18,7 +22,7 @@ class MOTDataset(Dataset):
         ignore_MOTC: bool = False,
         mode: str = "train",
         load_frame_data: bool = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Constructor
 
@@ -197,3 +201,69 @@ class OnlineTrainingDatasetWrapper(Dataset):
             int: Total number of samples in dataset
         """
         return len(self.dset)
+
+
+class SingleVideoDataset(MOTDataset):
+    def __init__(
+        self,
+        *args,
+        video_file: str,
+        detections_file: str,
+        **kwargs,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+
+        assert os.path.exists(video_file)
+        self.video_file = video_file
+        self.cap = cv2.VideoCapture(video_file)
+
+        # assert os.path.exists(detections_file)
+        self.detections_provider = RawDictDetections(detections_file)
+
+    def _build_db(self) -> None:
+        self.db = []
+        # Read video
+        frame_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        frame_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+        seq_name = os.path.splitext(os.path.basename(self.video_file))[0]
+
+        frame_count = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        for fid in range(frame_count):
+            dets = self.detections_provider.get(frame_id=fid)
+
+            sample_dict = {
+                "frame_height": frame_height,
+                "frame_width": frame_width,
+                "frame_id": fid,
+                "seq": seq_name,
+                "is_last_frame_in_seq": False if fid != (frame_count - 1) else True,
+                "seq_first_frame": 0,
+            }
+
+            sample_dict.update({"detections": dets})
+
+            self.db.append(sample_dict)
+
+    def _load_frame_data(self, sample: dict) -> dict:
+        """Load frame data
+
+        Args:
+            sample (dict): Sample without image data
+
+        Returns:
+            dict: Updated sample with image data
+        """
+        frame_id = sample["frame_id"]
+
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
+        ret, frame = self.cap.read()
+        assert ret
+
+        sample.update({"frame_data": cv2.imread(frame)})
+
+        return sample
+
+    def __del__(self):
+        self.cap.release()

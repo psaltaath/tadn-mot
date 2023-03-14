@@ -7,3 +7,4 @@ lightning_logs/
 .empty/
 .devcontainer/
 tmp__*/
+test.ipynb
