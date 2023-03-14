@@ -199,6 +199,8 @@ class MOTChallengeDataset(MOTDataset):
             self.data_root, self.mode, seq, imDir, f"{frame_id:06d}" + imExt
         )
         assert os.path.exists(im_file)
-        sample.update({"frame_data": cv2.imread(im_file)})
+        sample.update(
+            {"frame_data": cv2.cvtColor(cv2.imread(im_file), cv2.COLOR_BGR2RGB)}
+        )
 
         return sample

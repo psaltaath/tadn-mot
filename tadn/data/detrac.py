@@ -181,6 +181,12 @@ class DetracDataset(MOTDataset):
             dict: Updated sample with image data
         """
         assert os.path.exists(sample["img_url"])
-        sample.update({"frame_data": cv2.imread(sample["img_url"])})
+        sample.update(
+            {
+                "frame_data": cv2.cvtColor(
+                    cv2.imread(sample["img_url"]), cv2.COLOR_BGR2RGB
+                )
+            }
+        )
 
         return sample
