@@ -206,12 +206,11 @@ class OnlineTrainingDatasetWrapper(Dataset):
 class SingleVideoDataset(MOTDataset):
     def __init__(
         self,
-        *args,
         video_file: str,
         detections_file: str,
         **kwargs,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(root=video_file, **kwargs)
 
         assert os.path.exists(video_file)
         self.video_file = video_file
