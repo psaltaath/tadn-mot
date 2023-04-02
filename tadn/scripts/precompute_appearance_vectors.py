@@ -62,6 +62,11 @@ class ReidFeatures:
 
 def main(args):
     """Main script function"""
+    #base_folder = osp.join(
+            #args.data_root,
+            #f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
+        #)
+    #print(base_folder)
 
     torch.set_grad_enabled(False)
 
@@ -79,6 +84,8 @@ def main(args):
             args.data_root,
             f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
         )
+        print(base_folder)
+        
     elif args.dset_type == "detrac":
         dset = DetracDataset(
             args.data_root,
@@ -127,7 +134,7 @@ def main(args):
 
     feats_vocabulary = {}
     feats_dict = {}
-
+    
     for sample in tqdm(dset):  # type: ignore
         seq = sample["seq"]
         frame_id = sample["frame_id"]

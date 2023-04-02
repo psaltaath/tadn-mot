@@ -210,6 +210,7 @@ class SingleVideoDataset(MOTDataset):
         detections_file: str,
         **kwargs,
     ) -> None:
+        print(video_file)
         assert os.path.exists(video_file)
         self.video_file = video_file
         self.cap = cv2.VideoCapture(video_file)
@@ -217,7 +218,7 @@ class SingleVideoDataset(MOTDataset):
         # assert os.path.exists(detections_file)
         self.detections_provider = RawDictDetections(detections_file)
 
-        super().__init__(root=video_file, **kwargs)
+        super().__init__(video_file, **kwargs)
 
     def _build_db(self) -> None:
         self.db = []
