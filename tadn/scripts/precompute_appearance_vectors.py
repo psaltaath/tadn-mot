@@ -191,6 +191,7 @@ def main(args):
     )
     with open(voc_file, "wb") as f:
         f.write(pickle.dumps(feats_vocabulary))
+    print("Appearance vectors successfully completed!")
 
 
 if __name__ == "__main__":
