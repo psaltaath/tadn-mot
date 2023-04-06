@@ -106,6 +106,7 @@ class MOTChallengeDataset(MOTDataset):
         self.db = []
 
         for seq in self._retrieve_sequences():
+            print(f"Building dataset for seq: {seq}")
             parser.read(os.path.join(seq, "seqinfo.ini"))
 
             frame_height = int(parser.get("Sequence", "imHeight"))
