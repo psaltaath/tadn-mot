@@ -36,7 +36,6 @@ class Resnet18Features:
         )
 
     def __call__(self, x):
-
         if len(x) == 0:
             return torch.empty(0)
 
@@ -46,7 +45,6 @@ class Resnet18Features:
             out = self.model(batch).cpu()  # BS x 512
 
         return out
-
 
 
 class ReidFeatures:
@@ -213,7 +211,7 @@ def main(args):
                 real_xmin: int = max(0, int(d[0]))
                 real_ymin: int = max(0, int(d[1]))
                 if real_h <= 1 or real_w <= 1:
-                    patch_list.append(np.zeros((3, 256, 128), dtype=np.uint8))
+                    patch_list.append(np.zeros((256, 128, 3), dtype=np.uint8))
                 else:
                     patch_list.append(
                         frame[
@@ -240,7 +238,7 @@ def main(args):
                 )
                 feats_dict = {}
     except Exception as e:
-        print("Process interrupted by an exception!")
+        print("\nProcess interrupted by an exception!")
         print(e)
         print(f"Current key: {key}")
     finally:
