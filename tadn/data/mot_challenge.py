@@ -3,6 +3,7 @@ from functools import lru_cache
 import glob
 import os
 from enum import Enum, auto
+import pickle
 from typing import Callable, Iterable, List
 
 import cv2
@@ -45,6 +46,7 @@ class MOTChallengeDataset(MOTDataset):
         detector: str = "",
         category_set: MOTChallengeCategorySet = MOTChallengeCategorySet.TRAINING,
         version: str = "MOT17",
+        use_cached_db: bool = True,
         **kwargs,
     ) -> None:
         """Constructor
@@ -69,6 +71,7 @@ class MOTChallengeDataset(MOTDataset):
 
         self.detections_provider = None
         self.has_gt_annotations = True
+        self.use_cached_db = use_cached_db
 
         super().__init__(*args, **kwargs)
 
@@ -96,6 +99,17 @@ class MOTChallengeDataset(MOTDataset):
 
     def _build_db(self):
         """Private method to build dataset"""
+
+        cached_db_file = os.path.join(
+            self.data_root, f"MOTC_dset_{self.mode}_{self.detector}.cache.pkl"
+        )
+        if self.use_cached_db:
+            if os.path.exists(cached_db_file):
+                with open(cached_db_file, "rb") as f:
+                    self.db = pickle.load(f)
+                print("Loaded dset from cached DB file!")
+                return
+            print("Cached DB file not found! Building from scratch!")
 
         self.detections_provider = MOTChallengeDetections(
             rtv_fun=lambda seq: os.path.join(seq, "det", "det.txt")
@@ -177,6 +191,10 @@ class MOTChallengeDataset(MOTDataset):
 
             # Set "is_last_frame_in_seq" to True for the last entry of sequence seq
             self.db[-1]["is_last_frame_in_seq"] = True
+
+            if self.use_cached_db:
+                with open(cached_db_file, "wb") as f:
+                    pickle.dump(self.db, f)
 
     def _load_frame_data(self, sample: dict) -> dict:
         """Load frame data
