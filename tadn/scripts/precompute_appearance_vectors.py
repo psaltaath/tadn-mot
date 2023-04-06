@@ -1,8 +1,10 @@
 """Script to precompute appearance features vectors for the whole MOT dataset"""
+import glob
 import os
 import pickle
 from argparse import ArgumentParser
 from os import path as osp
+from typing import List
 
 import numpy as np
 import torch
@@ -54,19 +56,33 @@ class ReidFeatures:
             device="cuda" if torch.cuda.is_available() else "cpu",
         )
 
-    def __call__(self, x):
-        x = (x * 255).astype(np.uint8)
+        self.preprocess = Compose(
+            [
+                ToTensor(),
+                Resize((256, 128)),
+                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ]
+        )
 
-        return self.model(x)
+    def __call__(self, x: List[np.ndarray]):
+        if len(x) == 0:
+            return torch.empty(0)
+
+        batch = torch.stack(list(map(self.preprocess, x)))
+
+        with torch.no_grad():
+            out = self.model(batch).cpu()  # BS x 512
+
+        return out
 
 
 def main(args):
     """Main script function"""
-    #base_folder = osp.join(
-            #args.data_root,
-            #f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
-        #)
-    #print(base_folder)
+    # base_folder = osp.join(
+    # args.data_root,
+    # f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
+    # )
+    # print(base_folder)
 
     torch.set_grad_enabled(False)
 
@@ -85,7 +101,7 @@ def main(args):
             f"appearance_vectors_{args.feature_extractor}_{args.dset_mode}",
         )
         print(base_folder)
-        
+
     elif args.dset_type == "detrac":
         dset = DetracDataset(
             args.data_root,
@@ -126,71 +142,108 @@ def main(args):
     else:
         feature_extractor = ReidFeatures(args.reid_ckpt)
 
-    current_file_idx = 0
+    voc_file = osp.join(
+        base_folder,
+        f"ap_vectors.voc",
+    )
+
+    if os.path.exists(voc_file):
+        with open(voc_file, "rb") as f:
+            feats_vocabulary = pickle.load(f)
+        ap_vec_files = glob.glob(
+            osp.join(
+                base_folder,
+                f"ap_vec_*.apv",
+            )
+        )
+        current_file_idx = (
+            max(
+                list(
+                    map(
+                        lambda x: int(
+                            os.path.splitext(os.path.basename(x))[0].split("_")[-1]
+                        ),
+                        ap_vec_files,
+                    )
+                )
+            )
+            + 1
+        )
+    else:
+        feats_vocabulary = {}
+        current_file_idx = 0
+
     current_file = osp.join(
         base_folder,
         f"ap_vec_{current_file_idx}.apv",
     )
 
-    feats_vocabulary = {}
     feats_dict = {}
-    
-    for sample in tqdm(dset):  # type: ignore
-        seq = sample["seq"]
-        frame_id = sample["frame_id"]
 
-        detections = sample["detections"]
+    key = ""
+    try:
+        for sample in tqdm(dset):  # type: ignore
+            seq = sample["seq"]
+            frame_id = sample["frame_id"]
 
-        frame = sample["frame_data"].astype(np.float32) / 255
+            key = f"{seq}_{frame_id}"
 
-        feat_list = []
+            if key in feats_vocabulary:
+                continue
 
-        # For each detection, crop patch and compute CNN features
-        for d in detections:
-            real_w: int = int(d[2]) if d[0] > 0 else int(d[0] + d[2])
-            real_h: int = int(d[3]) if d[1] > 0 else int(d[1] + d[3])
-            real_xmin: int = max(0, int(d[0]))
-            real_ymin: int = max(0, int(d[1]))
-            if real_h <= 1 or real_w <= 1:
-                feat_list.append(torch.zeros(1, 512))
-            else:
-                feat_list.append(
-                    feature_extractor(
+            detections = sample["detections"]
+
+            frame = sample["frame_data"]  # (H, W, 3) uint8 ndarray
+
+            patch_list = []
+
+            # For each detection, crop patch and compute CNN features
+            for d in detections:
+                real_w: int = int(d[2]) if d[0] > 0 else int(d[0] + d[2])
+                real_h: int = int(d[3]) if d[1] > 0 else int(d[1] + d[3])
+                real_xmin: int = max(0, int(d[0]))
+                real_ymin: int = max(0, int(d[1]))
+                if real_h <= 1 or real_w <= 1:
+                    patch_list.append(np.zeros((3, 256, 128), dtype=np.uint8))
+                else:
+                    patch_list.append(
                         frame[
                             real_ymin : real_ymin + real_h,
                             real_xmin : real_xmin + real_w,
                         ]
-                    ).cpu()
+                    )
+            # Inference on a batch!
+            feats_tensor = feature_extractor(
+                patch_list
+            )  # num_dets x 512 @ cuda (if available)
+
+            # Key-value based features storage
+            feats_dict.update({key: feats_tensor})
+            feats_vocabulary.update({key: osp.basename(current_file)})
+
+            if len(feats_dict.keys()) == args.samples_per_file:
+                # Write to file
+                torch.save(feats_dict, current_file)
+                current_file_idx += 1
+                current_file = osp.join(
+                    base_folder,
+                    f"ap_vec_{current_file_idx}.apv",
                 )
+                feats_dict = {}
+    except Exception as e:
+        print("Process interrupted by an exception!")
+        print(e)
+        print(f"Current key: {key}")
+    finally:
+        torch.save(feats_dict, current_file)
 
-        if len(feat_list) == 0:
-            feats = torch.empty(0)
-        else:
-            feats = torch.cat(feat_list, dim=0)
+        voc_file = osp.join(
+            base_folder,
+            f"ap_vectors.voc",
+        )
+        with open(voc_file, "wb") as f:
+            f.write(pickle.dumps(feats_vocabulary))
 
-        # Key-value based features storage
-        key = f"{seq}_{frame_id}"
-        feats_dict.update({key: feats})
-        feats_vocabulary.update({key: osp.basename(current_file)})
-
-        if len(feats_dict.keys()) == args.samples_per_file:
-            # Write to file
-            torch.save(feats_dict, current_file)
-            current_file_idx += 1
-            current_file = osp.join(
-                base_folder,
-                f"ap_vec_{current_file_idx}.apv",
-            )
-            feats_dict = {}
-
-    torch.save(feats_dict, current_file)
-
-    voc_file = osp.join(
-        base_folder,
-        f"ap_vectors.voc",
-    )
-    with open(voc_file, "wb") as f:
-        f.write(pickle.dumps(feats_vocabulary))
     print("Appearance vectors successfully completed!")
 
 
