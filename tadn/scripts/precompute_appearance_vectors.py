@@ -36,8 +36,17 @@ class Resnet18Features:
         )
 
     def __call__(self, x):
-        x = self.T(x).unsqueeze(0)
-        return self.model(x)
+
+        if len(x) == 0:
+            return torch.empty(0)
+
+        batch = torch.stack(list(map(self.T, x)))
+
+        with torch.no_grad():
+            out = self.model(batch).cpu()  # BS x 512
+
+        return out
+
 
 
 class ReidFeatures:
