@@ -70,7 +70,7 @@ class MOTChallengeDataset(MOTDataset):
             self.category_ids = [-1]
 
         self.detections_provider = None
-        self.has_gt_annotations = True
+        self.has_gt_annotations = kwargs.get("mode", "train") == "train"
         self.use_cached_db = use_cached_db
 
         super().__init__(*args, **kwargs)
