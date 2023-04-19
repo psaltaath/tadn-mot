@@ -49,7 +49,10 @@ def main(args):
     frame = get_img(frame_id)
     assert frame is not None
 
-    out_video_file = os.path.join(args.results_dir, f"{args.seq_name}.mp4")
+    out_dir = os.path.join(args.data_root, "results")
+    if not os.path.exists(out_dir):
+       os.mkdir(out_dir)
+    out_video_file = os.path.join(out_dir, f"{args.seq_name}.mp4")
     print(out_video_file)
     out = cv2.VideoWriter(
         out_video_file,
