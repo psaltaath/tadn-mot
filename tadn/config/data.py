@@ -181,7 +181,7 @@ class DETRACDatasetConfig(MOTDatasetConfig):
 
 def select_dataset(v: Dict) -> MOTDatasetConfig:
     """Utility function to automatically map dataset to corresponding config"""
-    if v["type"].upper() in ["MOT17", "MOT15"]:
+    if v["type"].upper() in ["MOT17", "MOT15", "MOT20"]:
         return MOTChallengeDatasetConfig.parse_obj(v)
     elif v["type"].upper() == "DETRAC":
         return DETRACDatasetConfig.parse_obj(v)

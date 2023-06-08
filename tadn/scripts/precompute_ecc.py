@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dset_version",
         default="MOT17",
-        choices=["MOT17", "MOT15"],
+        choices=["MOT17", "MOT15", "MOT20"],
         help="Dataset version. Only for MOTChallenge datasets",
     )
 

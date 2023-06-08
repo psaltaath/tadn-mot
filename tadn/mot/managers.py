@@ -325,7 +325,7 @@ class GenericManager(AbstractManager):
 
         # Convert back to "dense" indices
         assigned_dets = dets_lut[assigned_valid_dets]
-        assigned_tgts = torch.from_numpy(assigned_valid_tgts)
+        assigned_tgts = assigned_valid_tgts
 
         return used_detections, assigned_dets, assigned_tgts
 

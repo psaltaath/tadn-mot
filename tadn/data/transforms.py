@@ -26,9 +26,14 @@ class AppVecProvider:
             feature_extractor (str, optional): Feature extractor str identifier. Defaults to "resnet18".
             detector (str, optional): Object detector str identifier. Defaults to "SDP".
         """
-        self.app_vec_dir = os.path.join(
-            data_root, f"appearance_vectors_{feature_extractor}_{detector}_{mode}"
-        )
+        if detector == "":
+            self.app_vec_dir = os.path.join(
+                data_root, f"appearance_vectors_{feature_extractor}_{mode}"
+            )
+        else:
+            self.app_vec_dir = os.path.join(
+                data_root, f"appearance_vectors_{feature_extractor}_{detector}_{mode}"
+            )
 
         with open(
             os.path.join(self.app_vec_dir, "ap_vectors.voc"),

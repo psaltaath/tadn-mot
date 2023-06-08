@@ -126,4 +126,3 @@ class ExperimentConfig(BaseModel):
 
     def __str__(self) -> str:
         return self.json(indent=2)
-

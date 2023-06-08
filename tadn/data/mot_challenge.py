@@ -56,10 +56,13 @@ class MOTChallengeDataset(MOTDataset):
         """
 
         assert detector in ["FRCNN", "SDP", "DPM", ""]
-        assert version in ["MOT17", "MOT15"]
+        assert version in ["MOT17", "MOT15", "MOT20"]
         self.version = version
-        if self.version != "MOT15":
+        if self.version == "MOT17":
             self.detector = detector
+            self.category_ids = MOTChallengeCategoryIds[category_set]
+        elif self.version == "MOT20":
+            self.detector = ""
             self.category_ids = MOTChallengeCategoryIds[category_set]
         else:
             self.detector = ""
@@ -133,7 +136,6 @@ class MOTChallengeDataset(MOTDataset):
                 raise AssertionError("Invalid split dataset type")
 
             for frame_id in range(first_frame, last_frame + 1):
-
                 # det_instance = det[det[:, 0] == frame_id + 1]
                 # dets = det_instance[:, 2:7].astype(np.float32)
                 dets = self.detections_provider.get(frame_id=frame_id + 1, seq=seq)

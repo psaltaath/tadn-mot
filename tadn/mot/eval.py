@@ -23,7 +23,7 @@ class MOTInference:
             val_tmp_root (str, optional): Path to output location. Defaults to "./test_results".
         """
         self.benchmark = benchmark
-        assert self.benchmark in ["MOT15", "MOT17"]
+        assert self.benchmark in ["MOT15", "MOT17", "MOT20"]
         self.split_to_eval = "test"
         self.val_tmp_root = val_tmp_root
 
