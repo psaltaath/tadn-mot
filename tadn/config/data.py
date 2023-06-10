@@ -128,6 +128,32 @@ class MOTChallengeDatasetConfig(MOTDatasetConfig):
             )
 
             return train_online_dset, val_online_dset
+        elif self.split == "benchmark":
+            train_dset = MOTChallengeDataset(
+                category_set=self.category_set,
+                detector=self.detector,
+                mode="train",
+                version=self.type.upper(),
+                **self.MOTDataset_kwargs(mode="train"),
+            )
+
+            train_online_dset = OnlineTrainingDatasetWrapper(
+                train_dset, skip_first_frame=self.skip_first_frame
+            )
+
+            val_dset = MOTChallengeDataset(
+                category_set=self.category_set,
+                detector=self.detector,
+                mode="test",
+                version=self.type.upper(),
+                **self.MOTDataset_kwargs(mode="val"),
+            )
+
+            val_online_dset = OnlineTrainingDatasetWrapper(
+                val_dset, skip_first_frame=self.skip_first_frame
+            )
+
+            return train_online_dset, val_online_dset
         else:
             raise NotImplementedError
 
