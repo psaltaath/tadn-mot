@@ -1,47 +1,34 @@
-# Transformer based Decision Networks for MOT
+# Transformer-based decision network for multiple object tracking (TADN)
+[![License: GPL 3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-Data association is a crucial component for any multiple object tracking (MOT) method that follows the tracking-by-detection paradigm. To generate complete trajectories such methods employ a data association process to establish assignments between detections and existing targets during each timestep. Recent data association approaches try to solve a multi-dimensional linear assignment task or a network flow minimization problem or either tackle it via multiple hypotheses tracking. However, during inference an optimization step that computes optimal assignments is required for every sequence frame adding significant computational complexity in any given solution. 
+Check our final paper in CVIU journal [here](https://www.sciencedirect.com/science/article/abs/pii/S1077314224000389)  
+or check our pre-print publication [here](https://arxiv.org/abs/2208.03571)
+
+### Highlights
+- Optimization during inference
+- TADN can directly infer assignment pairs between detections and active targets in a single forward pass of the network
+- TADN is integrated in a rather simple MOT framework
+- Coupled with a novel training strategy for efficient end-to-end training
+
+## Benchmark results
+
+| Dataset     | Detections          | MOTA          | IDF1          | MT            | ML            | FP             | FN              | IDSW          | Frag          | Hz            |
+|-------------|---------------|---------------|---------------|---------------|----------------|-----------------|---------------|---------------|---------------|---------------|
+| [MOT17](https://motchallenge.net/data/MOT17/) | Public | 54.6 | 49.0          | 22.4 | 30.2 | 36285          | 214857 | 4869          | 7821          | 10.0 |
+| [MOT17](https://motchallenge.net/data/MOT17/) | Private | 69.0 | 60.8          | 45.7 | 13.6 | 47466          | 124623 | 2955          | 4119          | - |
+| [MOT20](https://motchallenge.net/data/MOT20/) | Private | 68.7 | 61.0          | 57.4 | 14.3 | 27135          | 133045 | 1707          | 2321          | - |
+| [UA-DETRAC](https://detrac-db.rit.albany.edu/) | Private | 23.7 | -          | 61.2 | 8.2 | 31417          | 198714 | 198714          | -          | - |
+
+### Notes
+- TADN performance for MOT17 in Hz is achieved using a NVIDIA Geforce GTX2080Ti. Performance may vary for different hardware configurations.
+- TADN is trained **exclusively** on each benchmark's provided training data.
+- MOT17 and MOT20 private detections results are achieved using a community pretrained YOLO-X detector publicly available [here](https://github.com/ifzhang/ByteTrack).
+- UA-DETRAC metrics are the CLEAR metrics along the detector's PR-curve. 
 
 
 ![TADN MOT tracking pipeline](assets/mot_tracker.png)
 
-Transformer-based Assignment Decision Network (TADN) tackles data association without the need of any explicit optimization during inference. In particular, TADN can **directly infer assignment pairs** between detections and active targets in a single forward pass of the network. TADN is integrated in a rather simple MOT framework coupled with a novel training strategy for efficient end-to-end training. For more information check our pre-print publication at https://arxiv.org/abs/2208.03571
-
 ![TADN possible architectures](assets/branches.png)
-
-## Benchmark results
-
-
-Results on [MOT17 dataset](https://motchallenge.net/data/MOT17/) with public detections based on CLEAR metrics : 
-
-| Tracker     | MOTA          | IDF1          | MT            | ML            | FP             | FN              | IDSW          | Frag          | Hz            |
-|-------------|---------------|---------------|---------------|---------------|----------------|-----------------|---------------|---------------|---------------|
-| DASOT       | 48.0          | 51.3          | 19.9          | 34.9          | 38830          | 250533          | 3909          | -             | 9.1           |
-| DeepMOT     | 48.1          | 43.0          | 17.6          | 38.6          | 26490          | 262578          | 3696          | 5353          | 4.9           |
-| DMAN        | 48.2          | 55.7          | 19.3          | 38.3          | 26218          | 263608          | 2194          | 5378          | 0.3           |
-| TL-MHT      | 50.6          | **56.5** | 17.6          | 43.4          | 22213          | 255030          | **1407** | **2079** | -             |
-| MHT-DAM     | 50.7          | 47.2          | 20.8          | 36.9          | 22875          | 252889          | 2314          | 2865          | 0.9           |
-| FAMNet      | 52.0          | 48.7          | 19.1          | 33.4          | 14138          | 253616          | 3072          | 5318          | $0.1        |
-| DAN         | 52.4          | 49.5          | 21.4          | 30.7          | 25423          | 234592          | 8491          | 14797         | 6.3           |
-| Tracktor++  | 53.5          | 52.3          | 19.5          | 36.6          | **12201** | 248047          | 2072          | 4611          | 1.5           |
-| **TADN (Ours)** | **54.6** | 49.0          | **22.4** | **30.2**} | 36285          | **214857** | 4869          | 7821          | **10.0** |
-
-
-Results on [UA-DETRAC dataset](https://detrac-db.rit.albany.edu/) :
-
-| Detector + Tracker | PR-MOTA       | PR-MOTP       | PR-MT         | PR-ML        | PR-FP         | PR-FN           | PR-IDSW      |
-|--------------------|---------------|---------------|---------------|--------------|---------------|-----------------|--------------|
-| CompACT + H2T      | 12.4          | 35.7          | 14.8          | 19.4         | 51765         | 173899          | 852          |
-| CompACT + CMOT     | 12.6          | 36.1          | 16.1          | 18.6         | 57885         | 167110          | **285** |
-| CompACT + GOG      | 14.2          | 37.0          | 13.9          | 19.9         | 32092         | 180183          | 3334         |
-| EB + IOUT          | 19.4          | 28.9          | 17.7          | 18.4         | 14796         | 171805          | 2311         |
-| CompACT +FAMNet    | 19.8          | 36.7          | 17.1          | 18.2         | 14989         | 164433          | 617          |
-| EB + DAN           | 20.2          | 26.3          | 14.5          | 18.1         | **9747** | **135978** | 518          |
-| EB + Kalman-IOUT   | 21.1          | 28.6          | 21.9          | 17.6         | 19046         | 159178          | 462          |
-| **EB + TADN (Ours)**   | **23.7** | **83.2** | **61.2** | **8.2** | 314117        | 198714          | 2910         |
-
-> **Note :** UA-DETRAC challenge expands upon CLEAR metrics using the detector's Precision-Recall curve. Each metric value is the mean value for 10 equally spaced detection thresholds.
-
 
 
 ## Installation
@@ -178,16 +165,15 @@ Download pretrained models and their json configs for MOT17 and UA-DETRAC from [
 
 # Cite us!
 
-If you use this software in your research, please cite our preprint publication:
+If you use TADN in your research or wish to refer to the baseline results published here, please use the following BibTeX entry:
  
-Psalta, A., Tsironis, V., & Karantzalos, K. (2022). *Transformer-based assignment decision network for multiple object tracking.* arXiv preprint arXiv:2208.03571.
- 
-Bibtex: 
  ```
-@article{psalta2022transformer,
+@article{psalta2024transformer,
   title={Transformer-based assignment decision network for multiple object tracking},
   author={Psalta, Athena and Tsironis, Vasileios and Karantzalos, Konstantinos},
-  journal={arXiv preprint arXiv:2208.03571},
-  year={2022}
+  journal={Computer Vision and Image Understanding},
+  pages={103957},
+  year={2024},
+  publisher={Elsevier}
 }
  ```
