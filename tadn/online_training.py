@@ -552,8 +552,11 @@ class OnlineTraining(pl.LightningModule):
     def _test_or_val_cleanup_epoch_end(self) -> None:
         """Cleanup after each epoch of testing or validation"""
         assert isinstance(self.results_file, str)
-        if not os.path.exists(self.results_file) and len(self.val_res_buffer) > 0:
-            self.val_res_buffer = truncate_tracklets_MOTC_format(self.val_res_buffer)
+        if not os.path.exists(self.results_file):
+            if len(self.val_res_buffer) > 0:
+                self.val_res_buffer = truncate_tracklets_MOTC_format(
+                    self.val_res_buffer
+                )
             with open(self.results_file, "w") as f:
                 f.writelines(self.val_res_buffer)
             self.val_res_buffer = list()

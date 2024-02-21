@@ -128,6 +128,32 @@ class MOTChallengeDatasetConfig(MOTDatasetConfig):
             )
 
             return train_online_dset, val_online_dset
+        elif self.split == "benchmark":
+            train_dset = MOTChallengeDataset(
+                category_set=self.category_set,
+                detector=self.detector,
+                mode="train",
+                version=self.type.upper(),
+                **self.MOTDataset_kwargs(mode="train"),
+            )
+
+            train_online_dset = OnlineTrainingDatasetWrapper(
+                train_dset, skip_first_frame=self.skip_first_frame
+            )
+
+            val_dset = MOTChallengeDataset(
+                category_set=self.category_set,
+                detector=self.detector,
+                mode="test",
+                version=self.type.upper(),
+                **self.MOTDataset_kwargs(mode="val"),
+            )
+
+            val_online_dset = OnlineTrainingDatasetWrapper(
+                val_dset, skip_first_frame=self.skip_first_frame
+            )
+
+            return train_online_dset, val_online_dset
         else:
             raise NotImplementedError
 
@@ -181,7 +207,7 @@ class DETRACDatasetConfig(MOTDatasetConfig):
 
 def select_dataset(v: Dict) -> MOTDatasetConfig:
     """Utility function to automatically map dataset to corresponding config"""
-    if v["type"].upper() in ["MOT17", "MOT15"]:
+    if v["type"].upper() in ["MOT17", "MOT15", "MOT20"]:
         return MOTChallengeDatasetConfig.parse_obj(v)
     elif v["type"].upper() == "DETRAC":
         return DETRACDatasetConfig.parse_obj(v)

@@ -1,3 +1,14 @@
 __pycache__/
 legacy/
 .devcontainer.json
+.devcontainer/devcontainer.json
+.devcontainer/Dockerfile
+outputs/
+lightning_logs/
+test_results/
+tmp__*/
+*.ipynb
+checkpoints/
+tb_logs/
+convert_val50.py
+.vscode/
